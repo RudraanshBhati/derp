@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_d4af51a4ced60d51ab33574338551b3a {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_d4af51a4ced60d51ab33574338551b3a" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_d4af51a4ced60d51ab33574338551b3a = L.map(
+                "map_d4af51a4ced60d51ab33574338551b3a",
+                {
+                    center: [29.0588, 76.0856],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 7,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_b6493fcbe43464bdc89f6ea5873b80f2 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_b6493fcbe43464bdc89f6ea5873b80f2.addTo(map_d4af51a4ced60d51ab33574338551b3a);
+        
+    
+            var marker_a6d7010aeb6a6e71bc4945f13c7909a7 = L.marker(
+                [30.378, 76.777],
+                {
+}
+            ).addTo(map_d4af51a4ced60d51ab33574338551b3a);
+        
+    
+            var icon_8a4f695c433b3f26b2d8c63b5cfe8286 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "tint",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_034a48318ada2e92ad7cf9fb3c40a626 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_f987c73bad4039056aedc58baf9ad848 = $(`<div id="html_f987c73bad4039056aedc58baf9ad848" style="width: 100.0%; height: 100.0%;"><b>Ambala</b><br>Average Water Level: 6.7m</div>`)[0];
+                popup_034a48318ada2e92ad7cf9fb3c40a626.setContent(html_f987c73bad4039056aedc58baf9ad848);
+            
+        
+
+        marker_a6d7010aeb6a6e71bc4945f13c7909a7.bindPopup(popup_034a48318ada2e92ad7cf9fb3c40a626)
+        ;
+
+        
+    
+    
+            marker_a6d7010aeb6a6e71bc4945f13c7909a7.bindTooltip(
+                `<div>
+                     Ambala: 6.7m
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_a6d7010aeb6a6e71bc4945f13c7909a7.setIcon(icon_8a4f695c433b3f26b2d8c63b5cfe8286);
+            
+    
+            var marker_03ea1becd43cb6828d5732f0abb302ab = L.marker(
+                [28.704, 77.103],
+                {
+}
+            ).addTo(map_d4af51a4ced60d51ab33574338551b3a);
+        
+    
+            var icon_c8ade64c00caf398930ef3b36b9ea6ba = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "orange",
+  "iconColor": "white",
+  "icon": "tint",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_e5b2eabdd7a1aa240d130ac513ca5c65 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_2aaa1d92e4a104da118e79c078e12bf3 = $(`<div id="html_2aaa1d92e4a104da118e79c078e12bf3" style="width: 100.0%; height: 100.0%;"><b>Faridabad</b><br>Average Water Level: 16.6m</div>`)[0];
+                popup_e5b2eabdd7a1aa240d130ac513ca5c65.setContent(html_2aaa1d92e4a104da118e79c078e12bf3);
+            
+        
+
+        marker_03ea1becd43cb6828d5732f0abb302ab.bindPopup(popup_e5b2eabdd7a1aa240d130ac513ca5c65)
+        ;
+
+        
+    
+    
+            marker_03ea1becd43cb6828d5732f0abb302ab.bindTooltip(
+                `<div>
+                     Faridabad: 16.6m
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_03ea1becd43cb6828d5732f0abb302ab.setIcon(icon_c8ade64c00caf398930ef3b36b9ea6ba);
+            
+    
+            var marker_1825a2a5029f23cc18f3517b063174aa = L.marker(
+                [28.457, 77.027],
+                {
+}
+            ).addTo(map_d4af51a4ced60d51ab33574338551b3a);
+        
+    
+            var icon_5741425017a97e0c9f588555afe4dcf8 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "red",
+  "iconColor": "white",
+  "icon": "tint",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_516fad000912522b54c813ae4e558e04 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_06770a7e0c0baaa31074b03d2032241e = $(`<div id="html_06770a7e0c0baaa31074b03d2032241e" style="width: 100.0%; height: 100.0%;"><b>Gurugram</b><br>Average Water Level: 20.7m</div>`)[0];
+                popup_516fad000912522b54c813ae4e558e04.setContent(html_06770a7e0c0baaa31074b03d2032241e);
+            
+        
+
+        marker_1825a2a5029f23cc18f3517b063174aa.bindPopup(popup_516fad000912522b54c813ae4e558e04)
+        ;
+
+        
+    
+    
+            marker_1825a2a5029f23cc18f3517b063174aa.bindTooltip(
+                `<div>
+                     Gurugram: 20.7m
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_1825a2a5029f23cc18f3517b063174aa.setIcon(icon_5741425017a97e0c9f588555afe4dcf8);
+            
+    
+            var marker_eb1afb55bbebe34a1244d1fdb2366ecb = L.marker(
+                [29.159, 75.706],
+                {
+}
+            ).addTo(map_d4af51a4ced60d51ab33574338551b3a);
+        
+    
+            var icon_376a97686af0a964b7faa17df6757fc6 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "tint",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_6f6ba757a9f2fd20234727335d36e499 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_2d1cee80ad0ad39a4a0fae303ceb4551 = $(`<div id="html_2d1cee80ad0ad39a4a0fae303ceb4551" style="width: 100.0%; height: 100.0%;"><b>Hisar</b><br>Average Water Level: 7.9m</div>`)[0];
+                popup_6f6ba757a9f2fd20234727335d36e499.setContent(html_2d1cee80ad0ad39a4a0fae303ceb4551);
+            
+        
+
+        marker_eb1afb55bbebe34a1244d1fdb2366ecb.bindPopup(popup_6f6ba757a9f2fd20234727335d36e499)
+        ;
+
+        
+    
+    
+            marker_eb1afb55bbebe34a1244d1fdb2366ecb.bindTooltip(
+                `<div>
+                     Hisar: 7.9m
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_eb1afb55bbebe34a1244d1fdb2366ecb.setIcon(icon_376a97686af0a964b7faa17df6757fc6);
+            
+    
+            var marker_a2dd6bdd8d6326ee3739280dd7476592 = L.marker(
+                [29.472, 76.619],
+                {
+}
+            ).addTo(map_d4af51a4ced60d51ab33574338551b3a);
+        
+    
+            var icon_15384f355e615d12fb78dc6fc3951eae = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "orange",
+  "iconColor": "white",
+  "icon": "tint",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_91354aeeb2d23d987ef77481becb69b1 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_6bc42120280f3820ec785d964d370f87 = $(`<div id="html_6bc42120280f3820ec785d964d370f87" style="width: 100.0%; height: 100.0%;"><b>Jind</b><br>Average Water Level: 10.4m</div>`)[0];
+                popup_91354aeeb2d23d987ef77481becb69b1.setContent(html_6bc42120280f3820ec785d964d370f87);
+            
+        
+
+        marker_a2dd6bdd8d6326ee3739280dd7476592.bindPopup(popup_91354aeeb2d23d987ef77481becb69b1)
+        ;
+
+        
+    
+    
+            marker_a2dd6bdd8d6326ee3739280dd7476592.bindTooltip(
+                `<div>
+                     Jind: 10.4m
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_a2dd6bdd8d6326ee3739280dd7476592.setIcon(icon_15384f355e615d12fb78dc6fc3951eae);
+            
+    
+            var marker_93c6b426224a697daa6a37ff73c4ea04 = L.marker(
+                [29.686, 76.738],
+                {
+}
+            ).addTo(map_d4af51a4ced60d51ab33574338551b3a);
+        
+    
+            var icon_6185d5f5036c8bc7f38fd6632980a82e = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "orange",
+  "iconColor": "white",
+  "icon": "tint",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_3b72ce44cda0bc4e28f5ce134bf3724a = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_051ed70bb201e52bc7128881e3de3160 = $(`<div id="html_051ed70bb201e52bc7128881e3de3160" style="width: 100.0%; height: 100.0%;"><b>Karnal</b><br>Average Water Level: 13.4m</div>`)[0];
+                popup_3b72ce44cda0bc4e28f5ce134bf3724a.setContent(html_051ed70bb201e52bc7128881e3de3160);
+            
+        
+
+        marker_93c6b426224a697daa6a37ff73c4ea04.bindPopup(popup_3b72ce44cda0bc4e28f5ce134bf3724a)
+        ;
+
+        
+    
+    
+            marker_93c6b426224a697daa6a37ff73c4ea04.bindTooltip(
+                `<div>
+                     Karnal: 13.4m
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_93c6b426224a697daa6a37ff73c4ea04.setIcon(icon_6185d5f5036c8bc7f38fd6632980a82e);
+            
+    
+            var marker_ea3937f32b58189bc2555c939f8c291a = L.marker(
+                [29.946, 76.814],
+                {
+}
+            ).addTo(map_d4af51a4ced60d51ab33574338551b3a);
+        
+    
+            var icon_48ff8241695de1cdf5d76770fe4f8776 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "red",
+  "iconColor": "white",
+  "icon": "tint",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_5c2ccabb06528b0d5c4236085a133dd1 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_113673f2aa41c0c0a6a7efe63762628c = $(`<div id="html_113673f2aa41c0c0a6a7efe63762628c" style="width: 100.0%; height: 100.0%;"><b>Kurukshetra</b><br>Average Water Level: 28.5m</div>`)[0];
+                popup_5c2ccabb06528b0d5c4236085a133dd1.setContent(html_113673f2aa41c0c0a6a7efe63762628c);
+            
+        
+
+        marker_ea3937f32b58189bc2555c939f8c291a.bindPopup(popup_5c2ccabb06528b0d5c4236085a133dd1)
+        ;
+
+        
+    
+    
+            marker_ea3937f32b58189bc2555c939f8c291a.bindTooltip(
+                `<div>
+                     Kurukshetra: 28.5m
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_ea3937f32b58189bc2555c939f8c291a.setIcon(icon_48ff8241695de1cdf5d76770fe4f8776);
+            
+    
+            var marker_6ba1c8cb419c97398609c5c88ce6f996 = L.marker(
+                [28.895, 76.619],
+                {
+}
+            ).addTo(map_d4af51a4ced60d51ab33574338551b3a);
+        
+    
+            var icon_81a5223b5388aa6106b2073f6bec3158 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "tint",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_237c96616b00a0eca05da54887614c90 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_2e4373593a23f2b081c29bee4631bac0 = $(`<div id="html_2e4373593a23f2b081c29bee4631bac0" style="width: 100.0%; height: 100.0%;"><b>Rohtak</b><br>Average Water Level: 3.9m</div>`)[0];
+                popup_237c96616b00a0eca05da54887614c90.setContent(html_2e4373593a23f2b081c29bee4631bac0);
+            
+        
+
+        marker_6ba1c8cb419c97398609c5c88ce6f996.bindPopup(popup_237c96616b00a0eca05da54887614c90)
+        ;
+
+        
+    
+    
+            marker_6ba1c8cb419c97398609c5c88ce6f996.bindTooltip(
+                `<div>
+                     Rohtak: 3.9m
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_6ba1c8cb419c97398609c5c88ce6f996.setIcon(icon_81a5223b5388aa6106b2073f6bec3158);
+            
+    
+            var marker_a00a4d8bdab9dba696e2dbe2e7a05c7e = L.marker(
+                [29.391, 75.002],
+                {
+}
+            ).addTo(map_d4af51a4ced60d51ab33574338551b3a);
+        
+    
+            var icon_56dfc23bd6cab6006cc12af303b2e18e = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "orange",
+  "iconColor": "white",
+  "icon": "tint",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_40429fd94bc1cec5b46c5c971333f8e1 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_9389c488f990f00d15d4d51218748219 = $(`<div id="html_9389c488f990f00d15d4d51218748219" style="width: 100.0%; height: 100.0%;"><b>Sirsa</b><br>Average Water Level: 11.4m</div>`)[0];
+                popup_40429fd94bc1cec5b46c5c971333f8e1.setContent(html_9389c488f990f00d15d4d51218748219);
+            
+        
+
+        marker_a00a4d8bdab9dba696e2dbe2e7a05c7e.bindPopup(popup_40429fd94bc1cec5b46c5c971333f8e1)
+        ;
+
+        
+    
+    
+            marker_a00a4d8bdab9dba696e2dbe2e7a05c7e.bindTooltip(
+                `<div>
+                     Sirsa: 11.4m
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_a00a4d8bdab9dba696e2dbe2e7a05c7e.setIcon(icon_56dfc23bd6cab6006cc12af303b2e18e);
+            
+    
+            var marker_8920cb68e7054faf98ff3ab8bb0ead09 = L.marker(
+                [28.896, 76.964],
+                {
+}
+            ).addTo(map_d4af51a4ced60d51ab33574338551b3a);
+        
+    
+            var icon_5a1cb9d72a5fc3ec3908670ade4bc191 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "tint",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_5ffbb29d92ff963f83f6721b6c4bc85e = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_8c4c4b2d7bd35fb6781691df8c943b4c = $(`<div id="html_8c4c4b2d7bd35fb6781691df8c943b4c" style="width: 100.0%; height: 100.0%;"><b>Sonipat</b><br>Average Water Level: 5.4m</div>`)[0];
+                popup_5ffbb29d92ff963f83f6721b6c4bc85e.setContent(html_8c4c4b2d7bd35fb6781691df8c943b4c);
+            
+        
+
+        marker_8920cb68e7054faf98ff3ab8bb0ead09.bindPopup(popup_5ffbb29d92ff963f83f6721b6c4bc85e)
+        ;
+
+        
+    
+    
+            marker_8920cb68e7054faf98ff3ab8bb0ead09.bindTooltip(
+                `<div>
+                     Sonipat: 5.4m
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_8920cb68e7054faf98ff3ab8bb0ead09.setIcon(icon_5a1cb9d72a5fc3ec3908670ade4bc191);
+            
+</script>
+</html>
