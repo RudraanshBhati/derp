@@ -5,12 +5,11 @@ import ModelSelector from '../components/model-lab/ModelSelector';
 import PredictionComparisonChart from '../components/model-lab/PredictionComparisonChart';
 import MetricsTable from '../components/model-lab/MetricsTable';
 import FeatureImportance from '../components/model-lab/FeatureImportance';
-import ModelHealthMonitor from '../components/model-lab/ModelHealthMonitor';
 
 export default function ModelLabPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
-  const [selectedModels, setSelectedModels] = useState(['lstm', 'xgboost']); // Defaults
+  const [selectedModels, setSelectedModels] = useState(['lstm', 'randomForest', 'linearRegression']); // Show all by default
 
   useEffect(() => {
     let mounted = true;
@@ -44,9 +43,9 @@ export default function ModelLabPage() {
             <FlaskConical className="h-8 w-8 text-white" />
          </div>
          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Model Evaluation Lab</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Model Comparison Lab</h1>
             <p className="text-muted-foreground mt-1 text-lg">
-               Transparent performance benchmarking and regression analysis endpoint.
+               Comparing Linear Regression, Random Forest, and LSTM performance
             </p>
          </div>
       </div>
@@ -65,9 +64,6 @@ export default function ModelLabPage() {
 
          {/* Right Column: Visuals (3/4 width) */}
          <div className="xl:col-span-3 space-y-6">
-            
-            {/* Health Monitor */}
-            {data && <ModelHealthMonitor stats={data.health} />}
             
             {/* Primary Chart */}
             <PredictionComparisonChart 

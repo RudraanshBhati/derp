@@ -1,9 +1,8 @@
 // Mock Model Engine
 const MODELS = [
-  { id: 'lstm', name: 'LSTM (State Model)', color: '#3b82f6' },
-  { id: 'xgboost', name: 'XGBoost', color: '#8b5cf6' },
-  { id: 'prophet', name: 'Prophet', color: '#10b981' },
-  { id: 'regression', name: 'Baseline Regression', color: '#f59e0b' }
+  { id: 'lstm', name: 'LSTM (Best)', color: '#3b82f6', description: 'Deep learning time-series model' },
+  { id: 'randomForest', name: 'Random Forest', color: '#10b981', description: 'Ensemble tree-based model' },
+  { id: 'linearRegression', name: 'Linear Regression', color: '#f59e0b', description: 'Baseline statistical model' }
 ];
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -16,28 +15,57 @@ const generateTimeSeries = (days = 30) => {
     const date = new Date(now);
     date.setDate(date.getDate() - i);
     
-    // Base signal (sine wave + trend)
+    // Base signal (realistic groundwater level pattern)
     const t = i / 10;
-    const base = 15 + Math.sin(t) * 2 + (Math.random() * 0.5);
+    const base = 14.5 + Math.sin(t) * 2 + (Math.random() * 0.3);
     
     data.push({
       date: date.toISOString().split('T')[0],
       actual: Number(base.toFixed(2)),
-      lstm: Number((base + (Math.random() - 0.5) * 0.5).toFixed(2)),
-      xgboost: Number((base + (Math.random() - 0.5) * 0.8).toFixed(2)),
-      prophet: Number((base + Math.sin(t * 2) * 0.5 + 0.2).toFixed(2)),
-      regression: Number((base + (Math.random() - 0.5) * 1.5).toFixed(2)), // Higher error
+      // LSTM: Best performance - closest to actual
+      lstm: Number((base + (Math.random() - 0.5) * 0.4).toFixed(2)),
+      // Random Forest: Good but slightly more error
+      randomForest: Number((base + (Math.random() - 0.5) * 1.2).toFixed(2)),
+      // Linear Regression: Baseline with higher error
+      linearRegression: Number((base + (Math.random() - 0.5) * 2.5).toFixed(2)),
     });
   }
   return data;
 };
 
 const generateMetrics = () => {
+  // Based on your actual LSTM metrics from model_performance_metrics.csv
   return {
-    lstm: { rmse: 0.12, mae: 0.08, mape: 1.2, r2: 0.96, latency: '45ms', trainingTime: '2h 15m', freshness: '2h ago', version: 'v2.1.0' },
-    xgboost: { rmse: 0.18, mae: 0.12, mape: 1.8, r2: 0.92, latency: '12ms', trainingTime: '15m', freshness: '1d ago', version: 'v1.4.2' },
-    prophet: { rmse: 0.25, mae: 0.18, mape: 2.5, r2: 0.88, latency: '85ms', trainingTime: '45m', freshness: '12h ago', version: 'v0.9.1' },
-    regression: { rmse: 0.45, mae: 0.35, mape: 4.8, r2: 0.75, latency: '2ms', trainingTime: '30s', freshness: 'Live', version: 'v1.0.0' },
+    lstm: { 
+      rmse: 6.17, 
+      mae: 4.38, 
+      r2: 0.41, 
+      mape: 8.2,
+      trainTime: '2h 15m', 
+      epochs: 100,
+      batchSize: 32,
+      status: '🏆 Best'
+    },
+    randomForest: { 
+      rmse: 8.45, 
+      mae: 6.12, 
+      r2: 0.32, 
+      mape: 12.5,
+      trainTime: '15m', 
+      nEstimators: 100,
+      maxDepth: 20,
+      status: '✓ Good'
+    },
+    linearRegression: { 
+      rmse: 12.8, 
+      mae: 9.5, 
+      r2: 0.18, 
+      mape: 18.7,
+      trainTime: '45s',
+      regularization: 'Ridge',
+      alpha: 1.0,
+      status: 'Baseline'
+    },
   };
 };
 

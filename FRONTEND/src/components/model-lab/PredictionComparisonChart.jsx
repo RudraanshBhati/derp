@@ -6,16 +6,41 @@ export default function PredictionComparisonChart({ data, models, selectedModels
   if (loading) return <div className="h-[400px] bg-secondary/30 animate-pulse rounded-xl" />;
 
   const visibleModels = models.filter(m => selectedModels.includes(m.id));
+  
+  // Calculate stats for selected models
+  const stats = selectedModels.length > 0 ? {
+    totalPredictions: data?.length || 0,
+    modelsCompared: selectedModels.length,
+    dateRange: data?.length > 0 ? `${data[0].date} to ${data[data.length - 1].date}` : 'N/A'
+  } : null;
 
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="bg-card border rounded-xl p-4 h-[500px] flex flex-col"
+      className="bg-card border rounded-xl p-6 h-[500px] flex flex-col"
     >
        <div className="mb-4">
-          <h3 className="text-lg font-semibold">Prediction vs Actual</h3>
-          <p className="text-sm text-muted-foreground">Historical performance evaluation across selected models</p>
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">Groundwater Level Predictions</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Comparing model predictions against actual water level measurements
+              </p>
+            </div>
+            {stats && (
+              <div className="flex gap-4 text-xs">
+                <div className="text-right">
+                  <div className="text-muted-foreground">Data Points</div>
+                  <div className="font-semibold">{stats.totalPredictions}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-muted-foreground">Models</div>
+                  <div className="font-semibold">{stats.modelsCompared}</div>
+                </div>
+              </div>
+            )}
+          </div>
        </div>
 
        <div className="flex-1 min-h-0">
@@ -30,6 +55,7 @@ export default function PredictionComparisonChart({ data, models, selectedModels
                   axisLine={false} 
                />
                <YAxis 
+                  label={{ value: 'Water Level (meters)', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
                   stroke="hsl(var(--muted-foreground))" 
                   fontSize={12} 
                   tickLine={false} 
@@ -44,6 +70,7 @@ export default function PredictionComparisonChart({ data, models, selectedModels
                      fontSize: '12px'
                   }}
                   itemStyle={{ padding: 0 }}
+                  formatter={(value) => `${value.toFixed(2)}m`}
                />
                <Legend verticalAlign="top" height={36} />
                
@@ -51,7 +78,7 @@ export default function PredictionComparisonChart({ data, models, selectedModels
                <Line 
                  type="monotone" 
                  dataKey="actual" 
-                 name="Actual (Ground Truth)"
+                 name="Actual Water Level"
                  stroke="currentColor" 
                  strokeWidth={2}
                  dot={false}
