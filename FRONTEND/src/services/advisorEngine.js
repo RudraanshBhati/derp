@@ -84,3 +84,36 @@ export const generateResponse = async (query, districtId, lang = 'en') => {
     timestamp: new Date().toISOString()
   };
 };
+
+export const generateAdvisorReport = async (districtId, type, lang = 'en') => {
+  await delay(2000);
+  
+  const titles = {
+    en: { summary: "Groundwater Situation Summary", detailed: "Comprehensive Technical Report", forecast: "Resource Availability Forecast" },
+    hi: { summary: "भूजल स्थिति सारांश", detailed: "विस्तृत तकनीकी रिपोर्ट", forecast: "संसाधन उपलब्धता पूर्वानुमान" }
+  };
+
+  const sections = {
+    en: [
+        "Executive Review: Current water levels are operating within expected seasonal variance.",
+        "Key Metrics: pH: 7.2, TDS: 450ppm, Depth: 12.5m (avg).",
+        "Action Items: Recommended reduction in flood irrigation by 15%.",
+        "Social Impact: No major disputes reported in the selected district."
+    ],
+    hi: [
+        "कार्यकारी समीक्षा: वर्तमान जल स्तर अपेक्षित मौसमी विचरण के भीतर काम कर रहे हैं।",
+        "प्रमुख मेट्रिक्स: पीएच: 7.2, टीडीएस: 450 पीपीएम, गहराई: 12.5 मीटर (औसत)।",
+        "कार्यकारी वस्तुएं: बाढ़ सिंचाई में 15% की कमी की सिफारिश की गई।",
+        "सामाजिक प्रभाव: चयनित जिले में कोई बड़ा विवाद दर्ज नहीं किया गया।"
+    ]
+  };
+
+  return {
+    id: `RPT-${Date.now()}`,
+    title: titles[lang]?.[type] || titles['en'][type],
+    date: new Date().toLocaleDateString(),
+    districtId: districtId || 'Unknown',
+    content: sections[lang] || sections['en'],
+    type
+  };
+};

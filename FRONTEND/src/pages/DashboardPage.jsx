@@ -41,8 +41,8 @@ export default function DashboardPage() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-           <h1 className="text-3xl font-bold tracking-tight">National Groundwater Monitor</h1>
-           <p className="text-muted-foreground mt-1">Real-time surveillance and forecasting system.</p>
+           <h1 className="text-3xl font-bold tracking-tight">Haryana Groundwater Monitor</h1>
+           <p className="text-muted-foreground mt-1">Real-time surveillance and forecasting system for {stats?.totalDistricts || 208} districts.</p>
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full">
            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>

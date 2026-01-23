@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import ChatMessage from '../components/advisor/ChatMessage';
 import ChatInput from '../components/advisor/ChatInput';
 import AdvisorSidebar from '../components/advisor/AdvisorSidebar';
+import ReportGenerator from '../components/advisor/ReportGenerator';
 import { getSystemMessage, generateResponse } from '../services/advisorEngine';
 import { getDistrictList } from '../services/api';
 import { Bot } from 'lucide-react';
@@ -95,7 +96,9 @@ export default function AdvisorPage() {
         </div>
 
         {/* Main Chat Area */}
-        <div className="lg:col-span-3 flex flex-col h-full bg-card border rounded-2xl shadow-sm overflow-hidden relative">
+        <div className="lg:col-span-3 flex flex-col h-full gap-4">
+        
+        <div className="flex-1 flex flex-col min-h-0 bg-card border rounded-2xl shadow-sm overflow-hidden relative">
            
            {/* Header - Mobile Sidebar Trigger could go here */}
            <div className="p-4 border-b bg-secondary/10 flex items-center gap-3">
@@ -133,6 +136,9 @@ export default function AdvisorPage() {
 
            {/* Input Area */}
            <ChatInput onSend={handleSendMessage} language={language} />
+        </div>
+        
+        <ReportGenerator district={district} language={language} />
         </div>
       </div>
     </div>

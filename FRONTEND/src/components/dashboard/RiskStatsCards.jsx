@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { TrendingDown, TrendingUp, AlertTriangle, CloudRain, Droplets } from 'lucide-react';
+import { TrendingDown, TrendingUp, AlertTriangle, CloudRain, Droplets, Activity } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 const StatCard = ({ title, value, subtext, icon: Icon, trend, color, delay }) => (
@@ -41,11 +41,15 @@ export default function RiskStatsCards({ stats, loading }) {
     </div>;
   }
 
+  if (!stats) {
+    return null;
+  }
+
   const data = [
     {
       title: "Avg Water Level",
       value: `${stats.avgLevel} m`,
-      subtext: "National Average",
+      subtext: `Predicted: ${stats.avgPredictedLevel}m (${stats.changeRate > 0 ? '+' : ''}${stats.changeRate}%)`,
       icon: Droplets,
       color: "bg-blue-500",
       trend: stats.changeRate > 0 ? 'up' : 'down',
@@ -54,7 +58,7 @@ export default function RiskStatsCards({ stats, loading }) {
     {
       title: "Critical Zones",
       value: stats.criticalDistricts,
-      subtext: "Districts at high risk",
+      subtext: `${stats.warningDistricts} warning, ${stats.safeDistricts} safe (${stats.totalDistricts} total)`,
       icon: AlertTriangle,
       color: "bg-red-500",
       trend: null,
@@ -63,10 +67,10 @@ export default function RiskStatsCards({ stats, loading }) {
     {
       title: "Forecast Trend",
       value: stats.forecastTrend.charAt(0).toUpperCase() + stats.forecastTrend.slice(1),
-      subtext: "next 3 months",
-      icon: TrendingUp,
+      subtext: "Next 3 months prediction",
+      icon: Activity,
       color: "bg-amber-500",
-      trend: stats.forecastTrend === 'improving' ? 'up' : 'down',
+      trend: stats.forecastTrend === 'improving' ? 'up' : stats.forecastTrend === 'declining' ? 'down' : null,
       delay: 0.3
     },
     {
