@@ -1,12 +1,123 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
 import pandas as pd
 import os
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timedelta
 import numpy as np
 
-app = FastAPI(title="Groundwater Monitoring API", version="1.0.0")
+# Pydantic models for API responses
+class DashboardStats(BaseModel):
+    avgLevel: float = Field(..., description="Average actual water level in meters")
+    avgPredictedLevel: float = Field(..., description="Average predicted water level in meters")
+    criticalDistricts: int = Field(..., description="Number of districts in critical status (RMSE > 5.0 or MAE > 4.0)")
+    warningDistricts: int = Field(..., description="Number of districts in warning status (3.0 < RMSE <= 5.0 or 2.5 < MAE <= 4.0)")
+    safeDistricts: int = Field(..., description="Number of districts in safe status (RMSE <= 3.0 and MAE <= 2.5)")
+    totalDistricts: int = Field(..., description="Total number of monitored districts")
+    forecastTrend: str = Field(..., description="Overall trend: 'improving' or 'declining'")
+    rainfallIndex: float = Field(..., description="Regional rainfall index (0-100)")
+    changeRate: float = Field(..., description="Percentage change between predicted and actual levels")
+
+class ForecastDataPoint(BaseModel):
+    month: str = Field(..., description="Month label (e.g., 'Jan 2024')")
+    historical: float = Field(..., description="Historical actual water level in meters")
+    predicted: float = Field(..., description="Predicted water level in meters")
+    district: str = Field(..., description="District name")
+
+class District(BaseModel):
+    id: str = Field(..., description="Unique location ID")
+    name: str = Field(..., description="District name")
+    block: str = Field(..., description="Block name")
+    village: str = Field(..., description="Village name")
+    state: str = Field(default="Haryana", description="State name")
+    level: float = Field(..., description="Mean actual water level in meters")
+    predictedLevel: float = Field(..., description="Mean predicted water level in meters")
+    status: str = Field(..., description="Risk status: 'Safe', 'Warning', or 'Critical'")
+    lat: float = Field(..., description="Latitude coordinate")
+    lng: float = Field(..., description="Longitude coordinate")
+    rmse: float = Field(..., description="Root Mean Squared Error of predictions")
+    mae: float = Field(..., description="Mean Absolute Error of predictions")
+    r2: Optional[float] = Field(None, description="R² score (model fit quality, 0-1)")
+    nPredictions: int = Field(..., description="Number of predictions made for this location")
+
+class LocationCoordinates(BaseModel):
+    lat: float = Field(..., description="Latitude")
+    lng: float = Field(..., description="Longitude")
+
+class DistrictMetrics(BaseModel):
+    meanActual: float = Field(..., description="Mean actual water level in meters")
+    meanPredicted: float = Field(..., description="Mean predicted water level in meters")
+    rmse: float = Field(..., description="Root Mean Squared Error")
+    mae: float = Field(..., description="Mean Absolute Error")
+    r2: Optional[float] = Field(None, description="R² score")
+    nPredictions: int = Field(..., description="Number of predictions")
+
+class TimeSeriesPoint(BaseModel):
+    date: str = Field(..., description="Date in YYYY-MM-DD format")
+    actual: float = Field(..., description="Actual water level in meters")
+    predicted: float = Field(..., description="Predicted water level in meters")
+
+class DistrictDetail(BaseModel):
+    district: str = Field(..., description="District name")
+    block: str = Field(..., description="Block name")
+    village: str = Field(..., description="Village name")
+    location: LocationCoordinates = Field(..., description="Geographic coordinates")
+    metrics: DistrictMetrics = Field(..., description="Performance metrics")
+    status: str = Field(..., description="Risk status: 'Safe', 'Warning', or 'Critical'")
+    advisory: str = Field(..., description="Action advisory based on status")
+    timeSeries: List[TimeSeriesPoint] = Field(..., description="Historical time series data (up to 20 points)")
+
+class ModelMetrics(BaseModel):
+    train: Dict[str, float] = Field(..., description="Training set metrics (MAE, MSE, RMSE, R²)")
+    validation: Dict[str, float] = Field(..., description="Validation set metrics")
+    test: Dict[str, float] = Field(..., description="Test set metrics")
+
+class PredictionDetail(BaseModel):
+    predictionId: int = Field(..., description="Unique prediction ID")
+    locationId: int = Field(..., description="Location ID")
+    actual: float = Field(..., description="Actual water level")
+    predicted: float = Field(..., description="Predicted water level")
+    error: float = Field(..., description="Absolute prediction error")
+
+class HealthResponse(BaseModel):
+    status: str = Field(default="healthy", description="API health status")
+    data_files: Dict[str, bool] = Field(..., description="Availability of data files")
+    timestamp: str = Field(..., description="Current server timestamp")
+
+app = FastAPI(
+    title="Haryana Groundwater Monitoring API",
+    description="""
+## Deep Earth Resource Prediction (DERP) Backend API
+
+This API provides real-time groundwater monitoring data, predictions, and analytics for 208 districts across Haryana, India.
+
+### Features:
+- **Dashboard Statistics**: Overall water level trends and risk assessment
+- **District Data**: Detailed metrics for all 208 monitored locations
+- **Forecasting**: 12-month water level predictions
+- **Model Performance**: Evaluation metrics (RMSE, MAE, R²)
+- **Time Series Analysis**: Historical and predicted water levels
+
+### Data Sources:
+- `district_wise_performance.csv` - Aggregate metrics per district
+- `test_predictions_detailed.csv` - Individual prediction records
+- `prediction_summary_statistics.csv` - Overall model statistics
+
+### Risk Classification:
+- **Safe**: RMSE ≤ 3.0 AND MAE ≤ 2.5
+- **Warning**: 3.0 < RMSE ≤ 5.0 OR 2.5 < MAE ≤ 4.0
+- **Critical**: RMSE > 5.0 OR MAE > 4.0
+    """,
+    version="1.0.0",
+    contact={
+        "name": "DERP Team",
+        "email": "support@derp.example.com"
+    },
+    license_info={
+        "name": "MIT"
+    }
+)
 
 # Enable CORS for frontend communication
 app.add_middleware(
@@ -42,11 +153,17 @@ def calculate_risk_status(rmse: float, mae: float) -> str:
     else:
         return "Safe"
 
-@app.get("/")
+@app.get("/", tags=["Root"], summary="API Information")
 async def root():
+    """
+    Get API information and available endpoints.
+    
+    Returns a welcome message with links to all available endpoints.
+    """
     return {
         "message": "Groundwater Monitoring API",
         "version": "1.0.0",
+        "documentation": "/docs",
         "endpoints": {
             "dashboard": "/api/dashboard/stats",
             "forecast": "/api/dashboard/forecast",
@@ -58,9 +175,26 @@ async def root():
         }
     }
 
-@app.get("/api/dashboard/stats")
+@app.get(
+    "/api/dashboard/stats",
+    response_model=DashboardStats,
+    tags=["Dashboard"],
+    summary="Get dashboard statistics",
+    description="Returns overall statistics including average water levels, district risk counts, and trend analysis"
+)
 async def get_risk_stats():
-    """Get overall dashboard statistics"""
+    """
+    Get comprehensive dashboard statistics.
+    
+    **Returns:**
+    - Average actual and predicted water levels
+    - Count of districts by risk status (Critical/Warning/Safe)
+    - Forecast trend (improving/declining)
+    - Rainfall index
+    - Percentage change rate
+    
+    **Used by:** Dashboard overview cards and summary widgets
+    """
     try:
         # Load summary statistics
         df_summary = load_csv("prediction_summary_statistics.csv")
@@ -105,9 +239,25 @@ async def get_risk_stats():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching stats: {str(e)}")
 
-@app.get("/api/dashboard/forecast")
+@app.get(
+    "/api/dashboard/forecast",
+    response_model=List[ForecastDataPoint],
+    tags=["Dashboard"],
+    summary="Get 12-month forecast data",
+    description="Returns time series data with historical and predicted water levels for chart visualization"
+)
 async def get_forecast():
-    """Get forecast time series data for charts"""
+    """
+    Get forecast time series for dashboard chart.
+    
+    **Returns:**
+    - 12 monthly data points
+    - Historical (actual) water levels
+    - Predicted water levels
+    - Associated district names
+    
+    **Used by:** Dashboard forecast chart component
+    """
     try:
         df_test = load_csv("test_predictions_detailed.csv")
         
@@ -143,51 +293,137 @@ async def get_districts_count():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
-@app.get("/api/districts")
-async def get_districts():
-    """Get all districts with performance metrics"""
+@app.get("/api/districts/test")
+async def test_districts():
+    """Test endpoint to debug districts"""
     try:
         df = load_csv("district_wise_performance.csv")
-        # Convert to dict and ensure JSON serialization works
         result = df.to_dict('records')
         
-        districts = []
-        for record in result:
-            try:
-                rmse_val = float(record['rmse'])
-                mae_val = float(record['mae'])
-                status = calculate_risk_status(rmse_val, mae_val)
-                
-                district_data = {
-                    "id": str(int(record['location_id'])),
-                    "name": str(record['district']),
-                    "block": str(record['block']),
-                    "village": str(record['village']),
-                    "state": "Haryana",
-                    "level": round(float(record['mean_actual']), 2),
-                    "predictedLevel": round(float(record['mean_predicted']), 2),
-                    "status": status,
-                    "lat": round(float(record['latitude']), 5),
-                    "lng": round(float(record['longitude']), 5),
-                    "rmse": round(rmse_val, 2),
-                    "mae": round(mae_val, 2),
-                    "r2": round(float(record['r2']), 3),
-                    "nPredictions": int(record['n_predictions'])
-                }
-                districts.append(district_data)
-            except (ValueError, KeyError, TypeError) as e:
-                # Skip rows with missing/invalid data
-                continue
+        # Try just the first 3 records
+        sample = []
+        for i, record in enumerate(result[:3]):
+            rmse_val = float(record['rmse'])
+            mae_val = float(record['mae'])
+            status = calculate_risk_status(rmse_val, mae_val)
+            
+            district_data = {
+                "id": str(int(record['location_id'])),
+                "name": str(record['district']),
+                "status": status,
+                "lat": float(record['latitude']),
+                "lng": float(record['longitude']),
+            }
+            sample.append(district_data)
         
+        return {"count": len(result), "sample": sample}
+    except Exception as e:
+        import traceback
+        error_detail = traceback.format_exc()
+        return {"error": str(e), "traceback": error_detail}
+
+@app.get(
+    "/api/districts",
+    response_model=List[District],
+    tags=["Districts"],
+    summary="Get all districts",
+    description="Returns list of all 208 monitored districts with performance metrics and risk status"
+)
+async def get_districts(limit: Optional[int] = None):
+    """
+    Get all districts with comprehensive metrics.
+    
+    **Query Parameters:**
+    - `limit`: Optional limit on number of districts returned (for testing)
+    
+    **Returns:**
+    - List of all districts with:
+      - Location details (name, block, village, coordinates)
+      - Water level metrics (actual, predicted)
+      - Performance metrics (RMSE, MAE, R²)
+      - Risk status classification
+    
+    **Used by:** Map markers, district dropdown selector
+    """
+    try:
+        print(f"[DISTRICTS] Loading CSV...")
+        df = load_csv("district_wise_performance.csv")
+        print(f"[DISTRICTS] Loaded {len(df)} rows")
+        
+        # Replace inf and nan values with None (which becomes null in JSON)
+        df = df.replace([np.inf, -np.inf], np.nan)
+        
+        if limit:
+            df = df.head(limit)
+            print(f"[DISTRICTS] Limited to {limit} rows")
+        
+        result = df.to_dict('records')
+        print(f"[DISTRICTS] Converted to {len(result)} records")
+        
+        districts = []
+        for idx, record in enumerate(result):
+            if idx % 50 == 0:
+                print(f"[DISTRICTS] Processing record {idx}/{len(result)}")
+            
+            rmse_val = float(record['rmse'])
+            mae_val = float(record['mae'])
+            status = calculate_risk_status(rmse_val, mae_val)
+            
+            # Handle potential nan/inf values
+            r2_val = record['r2']
+            if pd.isna(r2_val):
+                r2_val = None
+            else:
+                r2_val = float(r2_val)
+            
+            district_data = {
+                "id": str(int(record['location_id'])),
+                "name": str(record['district']),
+                "block": str(record['block']),
+                "village": str(record['village']),
+                "state": "Haryana",
+                "level": float(record['mean_actual']),
+                "predictedLevel": float(record['mean_predicted']),
+                "status": status,
+                "lat": float(record['latitude']),
+                "lng": float(record['longitude']),
+                "rmse": float(rmse_val),
+                "mae": float(mae_val),
+                "r2": r2_val,  # Can be None if NaN
+                "nPredictions": int(record['n_predictions'])
+            }
+            districts.append(district_data)
+        
+        print(f"[DISTRICTS] Returning {len(districts)} districts")
         return districts
     except Exception as e:
         import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Error fetching districts: {str(e)}")
+        error_msg = traceback.format_exc()
+        print(f"[DISTRICTS ERROR] {error_msg}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/districts/{district_name}")
+@app.get(
+    "/api/districts/{district_name}",
+    response_model=DistrictDetail,
+    tags=["Districts"],
+    summary="Get district details",
+    description="Returns detailed metrics, time series, and advisory for a specific district"
+)
 async def get_district_detail(district_name: str):
-    """Get detailed information for a specific district"""
+    """
+    Get comprehensive details for a specific district.
+    
+    **Path Parameters:**
+    - `district_name`: Name of the district (e.g., 'Kaithal', 'Hisar')
+    
+    **Returns:**
+    - Complete district information
+    - Performance metrics (RMSE, MAE, R²)
+    - Time series data (up to 20 points)
+    - Risk status and advisory message
+    
+    **Used by:** District detail panel, chatbot context retrieval
+    """
     try:
         df_district = load_csv("district_wise_performance.csv")
         df_detailed = load_csv("test_predictions_detailed.csv")
@@ -253,9 +489,25 @@ async def get_district_detail(district_name: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching district detail: {str(e)}")
 
-@app.get("/api/model/metrics")
+@app.get(
+    "/api/model/metrics",
+    tags=["Model"],
+    summary="Get model performance metrics",
+    description="Returns performance metrics (RMSE, MAE, R²) for train/validation/test datasets"
+)
 async def get_model_metrics():
-    """Get model performance metrics across all datasets"""
+    """
+    Get model performance metrics across all datasets.
+    
+    **Returns:**
+    - Metrics for each dataset (train, validation, test)
+    - RMSE (Root Mean Squared Error)
+    - MAE (Mean Absolute Error)
+    - R² Score (model fit quality)
+    - Sample sizes
+    
+    **Used by:** Model Lab page, performance dashboard
+    """
     try:
         df = load_csv("model_performance_metrics.csv")
         
@@ -273,13 +525,39 @@ async def get_model_metrics():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching model metrics: {str(e)}")
 
-@app.get("/api/predictions")
+class PredictionResponse(BaseModel):
+    total: int = Field(..., description="Total number of predictions")
+    limit: int = Field(..., description="Limit per page")
+    offset: int = Field(..., description="Current offset")
+    predictions: List[Dict[str, Any]] = Field(..., description="List of prediction records")
+
+@app.get(
+    "/api/predictions",
+    response_model=PredictionResponse,
+    tags=["Predictions"],
+    summary="Get detailed predictions",
+    description="Returns individual prediction records with actual vs predicted values and errors"
+)
 async def get_predictions(
     dataset: Optional[str] = None,
     limit: int = 100,
     offset: int = 0
 ):
-    """Get prediction records with pagination"""
+    """
+    Get detailed prediction records with pagination.
+    
+    **Query Parameters:**
+    - `dataset`: Filter by dataset ('train', 'test', 'validation')
+    - `limit`: Maximum number of records to return (default: 100)
+    - `offset`: Number of records to skip (default: 0)
+    
+    **Returns:**
+    - Paginated prediction records
+    - Actual and predicted water levels
+    - Error metrics for each prediction
+    
+    **Used by:** Model Lab comparison charts, detailed analysis
+    """
     try:
         if dataset and dataset in ['train', 'test', 'validation']:
             df = load_csv(f"{dataset}_predictions.csv")
@@ -312,9 +590,23 @@ async def get_predictions(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching predictions: {str(e)}")
 
-@app.get("/api/summary")
+@app.get(
+    "/api/summary",
+    tags=["Statistics"],
+    summary="Get prediction summary statistics",
+    description="Returns overall statistical summary of all predictions"
+)
 async def get_summary():
-    """Get comprehensive summary statistics"""
+    """
+    Get prediction summary statistics.
+    
+    **Returns:**
+    - Mean, median, std deviation of water levels
+    - Overall RMSE, MAE metrics
+    - Min/max values
+    
+    **Used by:** Statistics dashboard, reporting
+    """
     try:
         df = load_csv("prediction_summary_statistics.csv")
         
@@ -367,9 +659,24 @@ async def get_districts_geojson():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error creating GeoJSON: {str(e)}")
 
-@app.get("/api/health")
+@app.get(
+    "/api/health",
+    response_model=HealthResponse,
+    tags=["System"],
+    summary="Health check",
+    description="Verify API is running and all data files are accessible"
+)
 async def health_check():
-    """Health check endpoint"""
+    """
+    Health check endpoint.
+    
+    **Returns:**
+    - API status ('healthy' or error)
+    - Data file availability status
+    - Current server timestamp
+    
+    **Used by:** Monitoring systems, startup verification
+    """
     try:
         # Check if data files are accessible
         files = [
@@ -394,6 +701,55 @@ async def health_check():
             "error": str(e),
             "timestamp": datetime.now().isoformat()
         }
+
+@app.get(
+    "/api/districts/list/names",
+    tags=["Districts"],
+    summary="Get district names only",
+    description="Returns a simple list of all district names for chatbot context and autocomplete"
+)
+async def get_district_names():
+    """
+    Get list of all district names.
+    
+    **Returns:**
+    - Simple array of district names
+    - Alphabetically sorted
+    - No duplicates
+    
+    **Used by:** Chatbot for district extraction, autocomplete dropdowns
+    """
+    try:
+        df = load_csv("district_wise_performance.csv")
+        districts = sorted(df['district'].unique().tolist())
+        return {"districts": districts, "count": len(districts)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching district names: {str(e)}")
+
+@app.get(
+    "/api/districts/count",
+    tags=["Districts"],
+    summary="Get district count",
+    description="Returns total number of monitored districts"
+)
+async def get_district_count():
+    """
+    Get total count of monitored districts.
+    
+    **Returns:**
+    - Total district count
+    - Column information
+    
+    **Used by:** Dashboard statistics, testing
+    """
+    try:
+        df = load_csv("district_wise_performance.csv")
+        return {
+            "count": len(df),
+            "columns": list(df.columns)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
