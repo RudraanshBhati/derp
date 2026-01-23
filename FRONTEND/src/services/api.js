@@ -157,3 +157,44 @@ export const checkHealth = async () => {
         return { status: 'unhealthy', error: error.message };
     }
 };
+
+/**
+ * Chatbot: Get context for user message
+ * This endpoint extracts district and returns real-time data
+ * Frontend should then call Gemini API with the returned context
+ */
+export const getChatbotContext = async (message, district = null) => {
+    try {
+        const response = await fetch(`${API_BASE}/chatbot/context`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message, district })
+        });
+        return await handleResponse(response);
+    } catch (error) {
+        console.error("Error getting chatbot context:", error);
+        return {
+            district_found: null,
+            district_data: null,
+            context: "Unable to connect to the backend API.",
+            suggestion: "error"
+        };
+    }
+};
+
+/**
+ * Get prediction data for a specific district
+ */
+export const getDistrictPredictions = async (districtName) => {
+    try {
+        const response = await fetch(`${API_BASE}/districts/${encodeURIComponent(districtName)}`);
+        const data = await handleResponse(response);
+        return data.predictions || [];
+    } catch (error) {
+        console.error(`Error fetching predictions for ${districtName}:`, error);
+        return [];
+    }
+};
+

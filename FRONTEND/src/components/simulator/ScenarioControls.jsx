@@ -1,111 +1,131 @@
 import React from 'react';
-import { RotateCcw, CloudRain, ThermometerSun, Sprout, Users } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { CloudRain, Thermometer, Droplets, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-const Slider = ({ label, icon: Icon, value, min, max, step, unit, onChange, color }) => (
-  <div className="space-y-3">
-    <div className="flex justify-between items-center">
+const SliderControl = ({ icon: Icon, label, param, value, min, max, unit, color, baseline, updateParam }) => (
+  <motion.div 
+    className="bg-card border rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow"
+    initial={{ opacity: 0, x: -20 }}
+    animate={{ opacity: 1, x: 0 }}
+  >
+    <div className="flex items-center justify-between mb-3">
       <div className="flex items-center gap-2">
-        <Icon className={cn("h-4 w-4", color)} />
-        <span className="text-sm font-medium">{label}</span>
+        <div className={`p-2 rounded-lg ${color}`}>
+          <Icon className="h-4 w-4 text-white" />
+        </div>
+        <span className="font-medium text-sm">{label}</span>
       </div>
-      <span className="text-xs font-mono bg-secondary px-2 py-1 rounded">
-        {value > 0 ? '+' : ''}{value}{unit}
+      <span className={`text-lg font-bold ${value > 0 ? 'text-green-600' : value < 0 ? 'text-red-600' : 'text-gray-500'}`}>
+        {value > 0 ? '+' : ''}{value}%
       </span>
     </div>
+
     <input
       type="range"
       min={min}
       max={max}
-      step={step}
       value={value}
-      onChange={(e) => onChange(parseFloat(e.target.value))}
-      className={cn(
-        "w-full h-2 rounded-lg appearance-none cursor-pointer bg-secondary accent-primary",
-        "focus:outline-none focus:ring-2 focus:ring-primary/50"
-      )}
+      onChange={(e) => updateParam(param, Number(e.target.value))}
+      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
     />
-  </div>
+
+    <div className="flex justify-between text-xs text-muted-foreground mt-2">
+      <span>{min}%</span>
+      <span className="font-medium">{baseline[param]}{unit}</span>
+      <span>{max}%</span>
+    </div>
+  </motion.div>
 );
 
-export default function ScenarioControls({ params, updateParam, applyPreset }) {
+export default function ScenarioControls({ params, baseline, updateParam, applyPreset }) {
+  const presets = [
+    { id: 'monsoon', label: '🌧️ Monsoon', desc: 'Heavy rainfall season' },
+    { id: 'drought', label: '☀️ Drought', desc: 'Water scarcity scenario' },
+    { id: 'heavyFarming', label: '🌾 Heavy Farming', desc: 'Intensive irrigation' },
+    { id: 'normal', label: '🔄 Reset', desc: 'Baseline conditions' },
+  ];
+
   return (
-    <div className="space-y-8 bg-card border rounded-xl p-6 h-full">
-      <div className="flex justify-between items-center pb-4 border-b">
-        <h3 className="font-semibold text-lg">Scenario Controls</h3>
-        <button 
-          onClick={() => applyPreset('reset')}
-          className="p-2 hover:bg-secondary rounded-full transition-colors text-muted-foreground"
-          title="Reset Parameters"
-        >
-          <RotateCcw className="h-4 w-4" />
-        </button>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-gradient-to-br from-primary/10 to-blue-500/10 border border-primary/20 rounded-xl p-5">
+        <h3 className="font-semibold text-lg mb-1">Scenario Parameters</h3>
+        <p className="text-sm text-muted-foreground">
+          Adjust environmental factors to simulate their impact
+        </p>
       </div>
 
-      <div className="space-y-6">
-        <Slider
-          label="Rainfall Change"
+      {/* Sliders */}
+      <div className="space-y-4">
+        <SliderControl
           icon={CloudRain}
+          label="Annual Rainfall"
+          param="rainfall"
           value={params.rainfall}
-          min={-50} max={50} step={1}
-          unit="%"
-          onChange={(v) => updateParam('rainfall', v)}
-          color="text-blue-500"
+          min={-80}
+          max={100}
+          unit=" mm/year"
+          color="bg-blue-500"
+          baseline={baseline}
+          updateParam={updateParam}
         />
 
-        <Slider
-          label="Temperature Rise"
-          icon={ThermometerSun}
+        <SliderControl
+          icon={Thermometer}
+          label="Avg Temperature"
+          param="temperature"
           value={params.temperature}
-          min={0} max={5} step={0.1}
+          min={-30}
+          max={50}
           unit="°C"
-          onChange={(v) => updateParam('temperature', v)}
-          color="text-orange-500"
+          color="bg-orange-500"
+          baseline={baseline}
+          updateParam={updateParam}
         />
 
-        <Slider
-          label="Extraction Rate"
-          icon={Sprout}
-          value={params.extraction}
-          min={-50} max={50} step={1}
-          unit="%"
-          onChange={(v) => updateParam('extraction', v)}
-          color="text-green-600"
-        />
-
-        <Slider
-          label="Population Growth"
-          icon={Users}
-          value={params.population}
-          min={0} max={20} step={0.5}
-          unit="%"
-          onChange={(v) => updateParam('population', v)}
-          color="text-purple-500"
+        <SliderControl
+          icon={Droplets}
+          label="Irrigation Area"
+          param="irrigation"
+          value={params.irrigation}
+          min={-50}
+          max={100}
+          unit=" hectares"
+          color="bg-cyan-500"
+          baseline={baseline}
+          updateParam={updateParam}
         />
       </div>
 
-      <div className="pt-6 border-t">
-        <p className="text-xs text-muted-foreground mb-3 font-semibold uppercase tracking-wider">Presets</p>
-        <div className="grid grid-cols-3 gap-2">
-          <button 
-            onClick={() => applyPreset('drought')}
-            className="text-xs px-3 py-2 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 font-medium hover:opacity-80 transition"
-          >
-            Extreme Drought
-          </button>
-          <button 
-            onClick={() => applyPreset('flood')}
-            className="text-xs px-3 py-2 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium hover:opacity-80 transition"
-          >
-            Heavy Monsoon
-          </button>
-          <button 
-            onClick={() => applyPreset('policy')}
-            className="text-xs px-3 py-2 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-medium hover:opacity-80 transition"
-          >
-            Conservation
-          </button>
+      {/* Presets */}
+      <div className="bg-card border rounded-xl p-5 shadow-sm">
+        <div className="flex items-center gap-2 mb-4">
+          <Sparkles className="h-4 w-4 text-primary" />
+          <h4 className="font-semibold">Quick Scenarios</h4>
         </div>
+        <div className="grid grid-cols-2 gap-3">
+          {presets.map((preset) => (
+            <button
+              key={preset.id}
+              onClick={() => applyPreset(preset.id)}
+              className="text-left p-3 rounded-lg border hover:border-primary hover:bg-primary/5 transition-all group"
+            >
+              <div className="font-medium text-sm group-hover:text-primary transition-colors">
+                {preset.label}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {preset.desc}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Info */}
+      <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+        <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
+          <strong>Note:</strong> This simulator uses statistical approximations. Results show directional trends and relative impacts based on historical data patterns.
+        </p>
       </div>
     </div>
   );

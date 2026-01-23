@@ -1,36 +1,72 @@
-import React from 'react';
-import { useSimulator } from '../hooks/useSimulator';
+import React, { useState } from 'react';
 import ScenarioControls from '../components/simulator/ScenarioControls';
 import ScenarioImpactChart from '../components/simulator/ScenarioImpactChart';
 import ImpactSummaryCards from '../components/simulator/ImpactSummaryCards';
 import { motion } from 'framer-motion';
+import { Waves } from 'lucide-react';
 
 export default function SimulatorPage() {
-  const { params, results, isCalculating, updateParam, applyPreset } = useSimulator();
+  // Baseline values (example district data)
+  const baseline = {
+    waterLevel: 14.5,  // meters
+    rainfall: 650,     // mm/year
+    temperature: 28,   // °C
+    irrigation: 5000   // hectares
+  };
 
-  const heatMapGrid = React.useMemo(() => {
-    // eslint-disable-next-line react-hooks/purity
-    const randomValues = Array.from({ length: 25 }, () => Math.floor(Math.random() * 80) + 10);
-    return (
-      <div className="grid grid-cols-5 gap-1 mt-6 opacity-50 w-full max-w-sm">
-        {randomValues.map((value, i) => (
-          <div
-            key={i}
-            className="h-8 rounded bg-primary"
-            style={{ opacity: value / 100 }}
-          />
-        ))}
-      </div>
-    );
-  }, []);
+  const [params, setParams] = useState({
+    rainfall: 0,      // % change
+    temperature: 0,   // % change
+    irrigation: 0     // % change
+  });
+
+  // Simple simulation math
+  const calculateImpact = () => {
+    // Impact weights (simplified)
+    const rainfallWeight = 0.35;   // Positive: more rain = higher water level
+    const tempWeight = -0.15;      // Negative: higher temp = lower water level
+    const irrigationWeight = -0.25; // Negative: more irrigation = lower water level
+
+    const totalImpact = 
+      (params.rainfall / 100) * rainfallWeight +
+      (params.temperature / 100) * tempWeight +
+      (params.irrigation / 100) * irrigationWeight;
+
+    const waterLevel = baseline.waterLevel * (1 + totalImpact);
+
+    return {
+      waterLevel
+    };
+  };
+
+  const results = calculateImpact();
+
+  const updateParam = (param, value) => {
+    setParams(prev => ({ ...prev, [param]: value }));
+  };
+
+  const applyPreset = (preset) => {
+    const presets = {
+      monsoon: { rainfall: 40, temperature: -10, irrigation: -20 },
+      drought: { rainfall: -60, temperature: 25, irrigation: 30 },
+      normal: { rainfall: 0, temperature: 0, irrigation: 0 },
+      heavyFarming: { rainfall: 0, temperature: 10, irrigation: 50 }
+    };
+    setParams(presets[preset] || presets.normal);
+  };
 
   return (
     <div className="animate-in fade-in duration-500 container mx-auto pb-10">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Climate Simulator</h1>
-        <p className="text-muted-foreground mt-1">
-          Model impact of environmental changes on groundwater sustainability.
-        </p>
+      <div className="mb-8 flex items-center gap-4">
+        <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl">
+          <Waves className="h-8 w-8 text-white" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Climate Impact Simulator</h1>
+          <p className="text-muted-foreground mt-1">
+            Model how environmental changes affect groundwater levels in real-time
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
@@ -38,6 +74,7 @@ export default function SimulatorPage() {
         <div className="lg:col-span-4">
            <ScenarioControls 
               params={params}
+              baseline={baseline}
               updateParam={updateParam}
               applyPreset={applyPreset}
            />
@@ -45,43 +82,15 @@ export default function SimulatorPage() {
 
         {/* Right Panel - Visualisation */}
         <div className="lg:col-span-8 space-y-6">
-           {results ? (
-             <>
-               <ImpactSummaryCards metrics={results.metrics} />
-               
-               <div className="relative">
-                  {isCalculating && (
-                    <div className="absolute inset-0 bg-background/50 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-xl">
-                       <span className="text-sm font-medium animate-pulse bg-card px-3 py-1 rounded-full shadow border">
-                          Recalculating models...
-                       </span>
-                    </div>
-                  )}
-                  <ScenarioImpactChart data={results.trend} />
-               </div>
-
-               {/* Placeholder for RiskDeltaHeatmap - using a simple visual for now */}
-               <motion.div 
-                 initial={{ opacity: 0 }}
-                 animate={{ opacity: 1 }}
-                 className="bg-card border rounded-xl p-6 shadow-sm h-[300px] flex flex-col items-center justify-center text-center relative overflow-hidden"
-               >
-                  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-400 via-background to-background"></div>
-                  <h3 className="text-lg font-semibold z-10">Risk Delta Heatmap</h3>
-                  <p className="text-sm text-muted-foreground max-w-md mt-2 z-10">
-                    Geospatial visualization of risk variance across districts based on current simulation parameters.
-                  </p>
-                  {heatMapGrid}
-               </motion.div>
-             </>
-           ) : (
-             <div className="h-full flex items-center justify-center min-h-[400px]">
-                <div className="flex flex-col items-center gap-2">
-                   <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                   <p className="text-muted-foreground text-sm">Initializing simulation engine...</p>
-                </div>
-             </div>
-           )}
+           <ImpactSummaryCards 
+              baseline={baseline}
+              results={results}
+           />
+           
+           <ScenarioImpactChart 
+              baseline={baseline}
+              results={results}
+           />
         </div>
       </div>
     </div>

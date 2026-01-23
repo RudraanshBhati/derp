@@ -17,7 +17,7 @@ export default function AdvisorSidebar({ district, setDistrict, language, setLan
           >
              <option value="">Select District</option>
              {districts.map(d => (
-                <option key={d.id} value={d.id}>{d.name}</option>
+                <option key={d.id} value={d.name}>{d.name}</option>
              ))}
           </select>
           <p className="text-xs text-muted-foreground mt-2 leading-relaxed">

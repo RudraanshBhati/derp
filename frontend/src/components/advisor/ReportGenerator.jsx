@@ -1,21 +1,29 @@
-import React, { useState } from 'react';
-import { FileText, Download, Loader2, CheckCircle, FileBarChart } from 'lucide-react';
-import { generateAdvisorReport } from '../../services/advisorEngine';
+import { useState } from 'react';
+import { FileText, Download, Loader2, CheckCircle, FileBarChart, AlertCircle } from 'lucide-react';
+import { generateGroundwaterReport } from '../../services/pdfGenerator';
 
 export default function ReportGenerator({ district, language }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [report, setReport] = useState(null);
   const [reportType, setReportType] = useState('summary');
+  const [error, setError] = useState(null);
 
   const handleGenerate = async () => {
+    if (!district) {
+      setError('Please select a district first');
+      return;
+    }
+
     setIsGenerating(true);
     setReport(null);
+    setError(null);
+    
     try {
-      // Pass district or default to 1 if empty
-      const result = await generateAdvisorReport(district || 1, reportType, language);
+      const result = await generateGroundwaterReport(district, reportType, language);
       setReport(result);
     } catch (e) {
       console.error(e);
+      setError(e.message || 'Failed to generate report');
     } finally {
       setIsGenerating(false);
     }
@@ -75,25 +83,26 @@ export default function ReportGenerator({ district, language }) {
       </div>
 
       <div className="flex items-center justify-between border-t pt-4">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm">
            {report && (
              <span className="flex items-center gap-1 text-green-600 font-medium animate-in fade-in">
-                <CheckCircle className="h-4 w-4" /> Report Ready
+                <CheckCircle className="h-4 w-4" /> {report.message}
              </span>
+           )}
+           {error && (
+             <span className="flex items-center gap-1 text-red-600 font-medium animate-in fade-in">
+                <AlertCircle className="h-4 w-4" /> {error}
+             </span>
+           )}
+           {!district && !isGenerating && (
+             <span className="text-muted-foreground text-xs">Select a district to generate report</span>
            )}
         </div>
         
         <div className="flex gap-3">
-          {report && (
-             <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors">
-                <Download className="h-4 w-4" />
-                {t.download}
-             </button>
-          )}
-
           <button
             onClick={handleGenerate}
-            disabled={isGenerating}
+            disabled={isGenerating || !district}
             className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
           >
             {isGenerating ? (
@@ -112,16 +121,18 @@ export default function ReportGenerator({ district, language }) {
       </div>
 
       {report && (
-         <div className="mt-4 p-4 bg-secondary/20 rounded-xl border border-secondary/40 animate-in slide-in-from-top-2">
-            <h4 className="font-semibold mb-2">{report.title}</h4>
-            <div className="text-sm text-muted-foreground space-y-1">
-               {report.content.map((line, i) => (
-                 <p key={i}>• {line}</p>
-               ))}
-            </div>
-            <div className="mt-3 text-xs text-muted-foreground/60 flex justify-between">
-               <span>ID: {report.id}</span>
-               <span>{report.date}</span>
+         <div className="mt-4 p-4 bg-green-50 dark:bg-green-950/20 rounded-xl border border-green-200 dark:border-green-800 animate-in slide-in-from-top-2">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+              <div className="flex-1">
+                <h4 className="font-semibold text-green-900 dark:text-green-100 mb-1">PDF Downloaded Successfully</h4>
+                <p className="text-sm text-green-700 dark:text-green-300">
+                  {report.fileName}
+                </p>
+                <p className="text-xs text-green-600 dark:text-green-400 mt-2">
+                  Check your downloads folder for the complete groundwater analysis report.
+                </p>
+              </div>
             </div>
          </div>
       )}

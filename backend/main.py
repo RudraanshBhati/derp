@@ -85,6 +85,16 @@ class HealthResponse(BaseModel):
     data_files: Dict[str, bool] = Field(..., description="Availability of data files")
     timestamp: str = Field(..., description="Current server timestamp")
 
+class ChatbotRequest(BaseModel):
+    message: str = Field(..., description="User's question or message")
+    district: Optional[str] = Field(None, description="Pre-selected district (optional)")
+
+class ChatbotResponse(BaseModel):
+    district_found: Optional[str] = Field(None, description="District extracted from message")
+    district_data: Optional[Dict[str, Any]] = Field(None, description="Real-time district data")
+    context: str = Field(..., description="Formatted context for Gemini prompt")
+    suggestion: str = Field(..., description="Suggested response type")
+
 app = FastAPI(
     title="Haryana Groundwater Monitoring API",
     description="""
@@ -750,6 +760,152 @@ async def get_district_count():
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post(
+    "/api/chatbot/context",
+    response_model=ChatbotResponse,
+    tags=["Chatbot"],
+    summary="Get context for chatbot response",
+    description="Extracts district from user message and returns real-time data for Gemini prompt injection"
+)
+async def get_chatbot_context(request: ChatbotRequest):
+    """
+    Process user message and prepare context for Gemini API.
+    
+    **Flow:**
+    1. Extract district name from user message
+    2. Fetch real-time data from API
+    3. Format context for prompt injection
+    4. Return data + context to frontend
+    
+    **Frontend then:**
+    - Takes the `context` string
+    - Injects it into Gemini system instruction
+    - Calls Gemini API with user message
+    - Displays Gemini's response
+    
+    **Example:**
+    ```
+    Request: {"message": "Can I dig in Kaithal?"}
+    Response: {
+      "district_found": "Kaithal",
+      "district_data": {...},
+      "context": "REAL-TIME DATA FOR KAITHAL: Water Level: 11.4m...",
+      "suggestion": "safe_to_proceed"
+    }
+    ```
+    """
+    try:
+        message_lower = request.message.lower()
+        
+        # Step 1: Get all district names
+        df = load_csv("district_wise_performance.csv")
+        districts = df['district'].unique().tolist()
+        
+        # Step 2: Extract district from message using word boundary matching
+        import re
+        district_found = None
+        if request.district:
+            # Pre-selected district
+            district_found = request.district
+            print(f"✅ Using pre-selected district: {district_found}")
+        else:
+            # Pattern matching with word boundaries for accurate extraction
+            # Sort districts by length (longest first) to match "Charkhi Dadri" before "Dadri"
+            sorted_districts = sorted(districts, key=len, reverse=True)
+            
+            for district in sorted_districts:
+                # Use word boundary regex for exact matching
+                pattern = r'\b' + re.escape(district.lower()) + r'\b'
+                if re.search(pattern, message_lower):
+                    district_found = district
+                    print(f"✅ Extracted district from message: {district_found}")
+                    break
+        
+        # Step 3: If no district found, return suggestion
+        if not district_found:
+            print(f"⚠️ No district found in message: {request.message}")
+            return {
+                "district_found": None,
+                "district_data": None,
+                "context": "No specific district mentioned. Please specify which district you're asking about.",
+                "suggestion": "ask_for_district"
+            }
+        
+        # Step 4: Fetch real data for this district
+        district_perf = df[df['district'].str.lower() == district_found.lower()]
+        
+        if district_perf.empty:
+            return {
+                "district_found": district_found,
+                "district_data": None,
+                "context": f"District '{district_found}' not found in our database.",
+                "suggestion": "district_not_found"
+            }
+        
+        district_row = district_perf.iloc[0]
+        
+        # Calculate status
+        status = calculate_risk_status(district_row['rmse'], district_row['mae'])
+        
+        # Build district data
+        district_data = {
+            "district": district_row['district'],
+            "block": district_row['block'],
+            "village": district_row['village'],
+            "meanActual": round(district_row['mean_actual'], 2),
+            "meanPredicted": round(district_row['mean_predicted'], 2),
+            "rmse": round(district_row['rmse'], 2),
+            "mae": round(district_row['mae'], 2),
+            "r2": round(district_row['r2'], 3) if pd.notna(district_row['r2']) else None,
+            "nPredictions": int(district_row['n_predictions']),
+            "status": status
+        }
+        
+        # Generate advisory
+        advisory_map = {
+            "Critical": "⚠️ CRITICAL: Groundwater levels critically low. Immediate action required. Restrict extraction and implement conservation measures.",
+            "Warning": "⚡ WARNING: Water levels declining. Monitor closely. Consider rainwater harvesting and reduced irrigation.",
+            "Safe": "✅ SAFE: Water levels stable. Continue sustainable practices."
+        }
+        advisory = advisory_map.get(status, "Monitor water levels regularly.")
+        
+        # Step 5: Format context for Gemini prompt
+        context = f"""
+REAL-TIME DATA FOR {district_found.upper()}:
+Location: {district_row['village']}, {district_row['block']} Block
+Current Water Level: {district_data['meanActual']}m depth
+Predicted Water Level: {district_data['meanPredicted']}m
+Prediction Accuracy (RMSE): {district_data['rmse']}m
+Mean Absolute Error (MAE): {district_data['mae']}m
+Model Fit Quality (R²): {district_data['r2']}
+Number of Predictions: {district_data['nPredictions']}
+Risk Status: {status}
+
+OFFICIAL ADVISORY: {advisory}
+
+INSTRUCTIONS:
+- Use the REAL-TIME DATA above to answer the user's question
+- Cite actual numbers (water level, RMSE, status)
+- If status is "Critical" → strongly advise AGAINST extraction
+- If status is "Warning" → suggest caution + monitoring
+- If status is "Safe" → approve with sustainable practices
+- Keep answer under 150 words
+- Be specific and helpful
+"""
+        
+        # Determine suggestion type
+        suggestion = "critical_warning" if status == "Critical" else "warning" if status == "Warning" else "safe_to_proceed"
+        
+        return {
+            "district_found": district_found,
+            "district_data": district_data,
+            "context": context.strip(),
+            "suggestion": suggestion
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing chatbot request: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
