@@ -1,0 +1,11 @@
+metric,train,validation,test
+Total Predictions,18491.0,2641.0,5283.0
+Mean Actual Water Level (m),9.7,10.25,10.6
+Mean Predicted Water Level (m),9.670000076293945,9.739999771118164,9.5
+Mean Error (m),-0.03,-0.51,-1.1
+Mean Absolute Error (m),3.88,4.77,4.38
+RMSE (m),5.41,7.64,6.17
+R² Score,0.613,0.402,0.41
+Min Error (m),-68.28,-86.53,-50.24
+Max Error (m),27.77,26.62,23.5
+Std Dev Error (m),5.41,7.62,6.07
