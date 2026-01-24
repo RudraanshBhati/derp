@@ -11,7 +11,7 @@ export default function Navbar() {
     { name: 'Dashboard', path: '/', icon: Activity },
     { name: 'Simulator', path: '/simulator', icon: BarChart2 },
     { name: 'Advisor', path: '/advisor', icon: ShieldAlert },
-    { name: 'Model Lab', path: '/lab', icon: FlaskConical },
+    // { name: 'Model Lab', path: '/lab', icon: FlaskConical },
   ];
 
   return (

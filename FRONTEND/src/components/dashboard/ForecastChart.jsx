@@ -17,12 +17,12 @@ export default function ForecastChart({ data, loading }) {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h3 className="text-lg font-semibold">Groundwater Forecast</h3>
-          <p className="text-sm text-muted-foreground">Historical vs Predicted Levels (Meters)</p>
+          <p className="text-sm text-muted-foreground">Actual vs Predicted Levels (Meters)</p>
         </div>
         <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1">
             <span className="w-3 h-3 rounded-full bg-blue-500"></span>
-            <span>Historical</span>
+            <span>Actual</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="w-3 h-3 rounded-full bg-purple-500"></span>

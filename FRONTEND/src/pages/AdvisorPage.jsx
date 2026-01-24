@@ -5,7 +5,7 @@ import AdvisorSidebar from '../components/advisor/AdvisorSidebar';
 import ReportGenerator from '../components/advisor/ReportGenerator';
 import { getChatbotContext, getDistrictList } from '../services/api';
 import { generateGeminiResponse } from '../services/gemini-config';
-import { Bot, AlertCircle } from 'lucide-react';
+import { Bot } from 'lucide-react';
 
 export default function AdvisorPage() {
   const [messages, setMessages] = useState([]);
@@ -21,7 +21,7 @@ export default function AdvisorPage() {
     const init = async () => {
       const d = await getDistrictList();
       setDistrictsList(d);
-      
+    
       // Initial Greeting
       const greeting = {
         id: 'init',
@@ -149,25 +149,25 @@ export default function AdvisorPage() {
     
     if (!district_data) return "Unable to retrieve district data.";
     
-    const { district, meanActual, status, rmse } = district_data;
+    const { district, meanActual, status } = district_data;
     
     if (lang === 'hi') {
       if (suggestion === 'critical_warning') {
-        return `${district} जिला - गंभीर चेतावनी\n\nभूजल स्थिति विश्लेषण:\n• वर्तमान जल स्तर: ${meanActual} मीटर गहराई\n• जोखिम स्थिति: ${status}\n• पूर्वानुमान त्रुटि (RMSE): ${rmse} मीटर\n\nअनुशंसा:\nभूजल का स्तर गंभीर रूप से कम है। इस क्षेत्र में किसी भी प्रकार की नई खुदाई या बोरवेल स्थापना की अनुशंसा नहीं की जाती है। तत्काल कार्रवाई आवश्यक है।\n\nआवश्यक उपाय:\n1. मौजूदा बोरवेल से निकासी को तुरंत सीमित करें\n2. वर्षा जल संचयन प्रणाली स्थापित करें\n3. जल संरक्षण उपाय अपनाएं\n4. नियमित जल स्तर निगरानी करें`;
+        return `${district} जिला - गंभीर चेतावनी\n\nभूजल स्थिति विश्लेषण:\n• वर्तमान जल स्तर: ${meanActual} मीटर गहराई\n• जोखिम स्थिति: ${status}\n\nअनुशंसा:\nभूजल का स्तर गंभीर रूप से कम है। इस क्षेत्र में किसी भी प्रकार की नई खुदाई या बोरवेल स्थापना की अनुशंसा नहीं की जाती है। तत्काल कार्रवाई आवश्यक है।\n\nआवश्यक उपाय:\n1. मौजूदा बोरवेल से निकासी को तुरंत सीमित करें\n2. वर्षा जल संचयन प्रणाली स्थापित करें\n3. जल संरक्षण उपाय अपनाएं\n4. नियमित जल स्तर निगरानी करें`;
       } else if (suggestion === 'warning') {
-        return `${district} जिला - चेतावनी\n\nभूजल स्थिति विश्लेषण:\n• वर्तमान जल स्तर: ${meanActual} मीटर गहराई\n• जोखिम स्थिति: ${status}\n• पूर्वानुमान त्रुटि (RMSE): ${rmse} मीटर\n\nअनुशंसा:\nजल स्तर में गिरावट देखी गई है। यदि बोरवेल खोदना आवश्यक है, तो सावधानी बरतें।\n\nसिफारिशें:\n1. बोरवेल की गहराई 15 मीटर से अधिक न करें\n2. ड्रिप सिंचाई प्रणाली का उपयोग करें\n3. मासिक जल स्तर निगरानी करें\n4. वर्षा जल संचयन लागू करें\n5. जल मीटर स्थापित करें`;
+        return `${district} जिला - चेतावनी\n\nभूजल स्थिति विश्लेषण:\n• वर्तमान जल स्तर: ${meanActual} मीटर गहराई\n• जोखिम स्थिति: ${status}\n\nअनुशंसा:\nजल स्तर में गिरावट देखी गई है। यदि बोरवेल खोदना आवश्यक है, तो सावधानी बरतें।\n\nसिफारिशें:\n1. बोरवेल की गहराई 15 मीटर से अधिक न करें\n2. ड्रिप सिंचाई प्रणाली का उपयोग करें\n3. मासिक जल स्तर निगरानी करें\n4. वर्षा जल संचयन लागू करें\n5. जल मीटर स्थापित करें`;
       } else {
-        return `${district} जिला - सुरक्षित स्थिति\n\nभूजल स्थिति विश्लेषण:\n• वर्तमान जल स्तर: ${meanActual} मीटर गहराई\n• जोखिम स्थिति: ${status}\n• पूर्वानुमान त्रुटि (RMSE): ${rmse} मीटर\n\nअनुशंसा:\nभूजल स्तर स्थिर है और पूर्वानुमान सटीकता अच्छी है। आप सतत प्रथाओं के साथ आगे बढ़ सकते हैं।\n\nसिफारिशें:\n1. अधिकतम बोरवेल गहराई: 15 मीटर\n2. वर्षा जल संचयन प्रणाली स्थापित करें\n3. कुशल सिंचाई विधियां अपनाएं\n4. त्रैमासिक जल स्तर निगरानी करें\n5. दीर्घकालिक स्थिरता के लिए जल बचत करें`;
+        return `${district} जिला - सुरक्षित स्थिति\n\nभूजल स्थिति विश्लेषण:\n• वर्तमान जल स्तर: ${meanActual} मीटर गहराई\n• जोखिम स्थिति: ${status}\n\nअनुशंसा:\nभूजल स्तर स्थिर है। आप सतत प्रथाओं के साथ आगे बढ़ सकते हैं।\n\nसिफारिशें:\n1. अधिकतम बोरवेल गहराई: 15 मीटर\n2. वर्षा जल संचयन प्रणाली स्थापित करें\n3. कुशल सिंचाई विधियां अपनाएं\n4. त्रैमासिक जल स्तर निगरानी करें\n5. दीर्घकालिक स्थिरता के लिए जल बचत करें`;
       }
     }
     
     // English response
     if (suggestion === 'critical_warning') {
-      return `${district} District - Critical Warning\n\nGroundwater Status Analysis:\n• Current Water Level: ${meanActual}m depth\n• Risk Status: ${status}\n• Prediction Error (RMSE): ${rmse}m\n\nRecommendation:\nGroundwater levels are critically low. New borewell drilling or extraction activities are NOT RECOMMENDED in this area. Immediate action is required.\n\nRequired Actions:\n1. Immediately limit extraction from existing borewells\n2. Implement rainwater harvesting systems\n3. Adopt strict water conservation measures\n4. Conduct regular water level monitoring\n5. Consult local groundwater authorities`;
+      return `${district} District - Critical Warning\n\nGroundwater Status Analysis:\n• Current Water Level: ${meanActual}m depth\n• Risk Status: ${status}\n\nRecommendation:\nGroundwater levels are critically low. New borewell drilling or extraction activities are NOT RECOMMENDED in this area. Immediate action is required.\n\nRequired Actions:\n1. Immediately limit extraction from existing borewells\n2. Implement rainwater harvesting systems\n3. Adopt strict water conservation measures\n4. Conduct regular water level monitoring\n5. Consult local groundwater authorities`;
     } else if (suggestion === 'warning') {
-      return `${district} District - Caution Advised\n\nGroundwater Status Analysis:\n• Current Water Level: ${meanActual}m depth\n• Risk Status: ${status}\n• Prediction Error (RMSE): ${rmse}m\n\nRecommendation:\nWater levels show declining trend. If borewell drilling is essential, proceed with caution and follow recommendations.\n\nRecommendations:\n1. Limit borewell depth to maximum 15 meters\n2. Install drip irrigation systems\n3. Conduct monthly water level monitoring\n4. Implement rainwater harvesting\n5. Install water meters for usage tracking`;
+      return `${district} District - Caution Advised\n\nGroundwater Status Analysis:\n• Current Water Level: ${meanActual}m depth\n• Risk Status: ${status}\n\nRecommendation:\nWater levels show declining trend. If borewell drilling is essential, proceed with caution and follow recommendations.\n\nRecommendations:\n1. Limit borewell depth to maximum 15 meters\n2. Install drip irrigation systems\n3. Conduct monthly water level monitoring\n4. Implement rainwater harvesting\n5. Install water meters for usage tracking`;
     } else {
-      return `${district} District - Safe Status\n\nGroundwater Status Analysis:\n• Current Water Level: ${meanActual}m depth\n• Risk Status: ${status}\n• Prediction Error (RMSE): ${rmse}m\n\nRecommendation:\nGroundwater levels are stable with good prediction accuracy. You may proceed with sustainable water management practices.\n\nRecommendations:\n1. Maximum recommended borewell depth: 15 meters\n2. Install rainwater harvesting systems\n3. Use efficient irrigation methods\n4. Monitor water levels quarterly\n5. Implement water conservation for long-term sustainability`;
+      return `${district} District - Safe Status\n\nGroundwater Status Analysis:\n• Current Water Level: ${meanActual}m depth\n• Risk Status: ${status}\n\nRecommendation:\nGroundwater levels are stable. You may proceed with sustainable water management practices.\n\nRecommendations:\n1. Maximum recommended borewell depth: 15 meters\n2. Install rainwater harvesting systems\n3. Use efficient irrigation methods\n4. Monitor water levels quarterly\n5. Implement water conservation for long-term sustainability`;
     }
   };
 
@@ -197,7 +197,7 @@ export default function AdvisorPage() {
                  <Bot className="h-6 w-6 text-primary" />
               </div>
               <div>
-                 <h2 className="font-bold">AquaGuard Advisor</h2>
+                 <h2 className="font-bold">.derp Advisor</h2>
                  <p className="text-xs text-muted-foreground flex items-center gap-1">
                    <span className="w-2 h-2 rounded-full bg-green-500"></span> Online
                  </p>

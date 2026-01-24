@@ -95,21 +95,6 @@ export default function DistrictPanel({ districts, selectedDistrict, onSelect })
 
                 {districtDetail && (
                   <>
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="p-2 bg-background rounded border text-center">
-                        <div className="text-xs text-muted-foreground">RMSE</div>
-                        <div className="font-mono font-semibold text-sm">{districtDetail.metrics.rmse}</div>
-                      </div>
-                      <div className="p-2 bg-background rounded border text-center">
-                        <div className="text-xs text-muted-foreground">MAE</div>
-                        <div className="font-mono font-semibold text-sm">{districtDetail.metrics.mae}</div>
-                      </div>
-                      <div className="p-2 bg-background rounded border text-center">
-                        <div className="text-xs text-muted-foreground">R²</div>
-                        <div className="font-mono font-semibold text-sm">{districtDetail.metrics.r2}</div>
-                      </div>
-                    </div>
-
                     {districtDetail.timeSeries && districtDetail.timeSeries.length > 0 && (
                       <div className="bg-background rounded-lg border p-3">
                         <div className="text-xs font-semibold mb-2">Historical Trend</div>

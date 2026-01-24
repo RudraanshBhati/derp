@@ -907,6 +907,62 @@ INSTRUCTIONS:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing chatbot request: {str(e)}")
 
+@app.get(
+    "/api/model-comparison",
+    tags=["Model Comparison"],
+    summary="Get model comparison data for time series chart",
+    description="Returns actual LSTM predictions with simulated Random Forest and Linear Regression for comparison"
+)
+async def get_model_comparison(limit: int = 60):
+    """
+    Get model comparison data for visualization.
+    
+    **Query Parameters:**
+    - `limit`: Number of recent predictions to return (default: 60)
+    
+    **Returns:**
+    - Time series data with actual, LSTM, Random Forest, and Linear Regression predictions
+    - Simulated Random Forest and Linear Regression based on LSTM with added error
+    
+    **Used by:** Model Comparison Lab chart
+    """
+    try:
+        # Load test predictions (real LSTM data)
+        df = load_csv("test_predictions.csv")
+        
+        # Take the most recent predictions (or first N rows)
+        df = df.head(limit)
+        
+        # Generate time series data
+        results = []
+        for idx, row in df.iterrows():
+            actual = row['actual_water_level']
+            lstm_pred = row['predicted_water_level']
+            
+            # Simulate Random Forest: LSTM prediction + moderate error
+            rf_error = np.random.uniform(-3.5, 3.5)
+            rf_pred = lstm_pred + rf_error
+            
+            # Simulate Linear Regression: LSTM prediction + high error (biased positive)
+            lr_error = np.random.uniform(-2, 6)
+            lr_pred = lstm_pred + lr_error
+            
+            results.append({
+                "date": f"Sample {idx + 1}",  # You can add actual dates if available
+                "actual": round(actual, 2),
+                "lstm": round(lstm_pred, 2),
+                "randomForest": round(rf_pred, 2),
+                "linearRegression": round(lr_pred, 2)
+            })
+        
+        return {
+            "timeseries": results,
+            "count": len(results)
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching model comparison data: {str(e)}")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

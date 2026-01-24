@@ -90,10 +90,6 @@ export default function RiskMap({ data, loading }) {
                      <span className="text-gray-600">Predicted:</span>
                      <span className="font-semibold">{district.predictedLevel}m</span>
                    </div>
-                   <div className="flex justify-between text-xs">
-                     <span className="text-gray-600">RMSE:</span>
-                     <span className="font-mono">{district.rmse}</span>
-                   </div>
                  </div>
               </div>
             </Popup>

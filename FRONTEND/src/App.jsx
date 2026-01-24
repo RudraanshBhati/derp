@@ -19,7 +19,7 @@ function App() {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/simulator" element={<SimulatorPage />} />
           <Route path="/advisor" element={<AdvisorPage />} />
-          <Route path="/lab" element={<ModelLabPage />} />
+          {/* <Route path="/lab" element={<ModelLabPage />} /> */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>

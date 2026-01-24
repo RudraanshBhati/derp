@@ -28,7 +28,7 @@ REAL-TIME DATA FOR ${contextData.district_data?.district?.toUpperCase()}:
 ${contextData.context}
 
 INSTRUCTIONS:
-1. Start with: "${contextData.district_data?.district} has water at ${contextData.district_data?.meanActual}m depth, RMSE ${contextData.district_data?.rmse}m, Status: ${contextData.district_data?.status}."
+1. Start with: "${contextData.district_data?.district} has water at ${contextData.district_data?.meanActual}m depth, Status: ${contextData.district_data?.status}."
 2. Answer their EXACT question (borewell? irrigation? depth?) with YES/NO or specific advice
 3. Give 2-3 actionable recommendations based on their question
 4. Keep it under 150 words, conversational tone
