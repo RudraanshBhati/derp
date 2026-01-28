@@ -6,6 +6,10 @@ import os
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timedelta
 import numpy as np
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Pydantic models for API responses
 class DashboardStats(BaseModel):
@@ -130,9 +134,15 @@ This API provides real-time groundwater monitoring data, predictions, and analyt
 )
 
 # Enable CORS for frontend communication
+# Environment variable for production frontend URL
+ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -150,7 +160,15 @@ def load_csv(filename: str) -> pd.DataFrame:
     if filename not in _cache:
         path = os.path.join(DATA_PATH, filename)
         if not os.path.exists(path):
-            raise HTTPException(status_code=404, detail=f"File {filename} not found")
+            # Try alternative path for deployment environments
+            alt_path = os.path.join(BASE_DIR, "data", "predictions", filename)
+            if os.path.exists(alt_path):
+                path = alt_path
+            else:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"File {filename} not found. Searched: {path}, {alt_path}"
+                )
         _cache[filename] = pd.read_csv(path)
     return _cache[filename]
 
@@ -173,6 +191,9 @@ async def root():
     return {
         "message": "Groundwater Monitoring API",
         "version": "1.0.0",
+        "status": "operational",
+        "data_path": DATA_PATH,
+        "data_files_found": os.path.exists(DATA_PATH),
         "documentation": "/docs",
         "endpoints": {
             "dashboard": "/api/dashboard/stats",
